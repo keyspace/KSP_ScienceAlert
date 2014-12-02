@@ -346,10 +346,10 @@ namespace ScienceAlert
 
                     // it's possible the new vessel is in fact packed (almost certain to be a DiscoverableObject)
                     // so we need to be careful not to access any parts if it is
-                    Log.Debug("  - Acquiring new vessel mid");
-                    uint mid = newVessel.packed ? newVessel.protoVessel.protoPartSnapshots[newVessel.protoVessel.rootIndex].missionID : newVessel.rootPart.missionID;
+                    // bugfix: newVessel.packed => newVessel.loaded. Thanks taniwha!
+                    uint mid = !newVessel.loaded ? newVessel.protoVessel.protoPartSnapshots[newVessel.protoVessel.rootIndex].missionID : newVessel.rootPart.missionID;
 
-                    Log.Debug("  - new vessel mission id = " + mid);
+                    Log.Debug("ProfileManager.OnVesselCreate: new vessel mission id = " + mid);
 
                     if (mid == FlightGlobals.ActiveVessel.rootPart.missionID)
                         if (vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id))
@@ -392,19 +392,6 @@ namespace ScienceAlert
                         Log.Normal("New vessel created; assigning it a clone of parent's profile {0}", parentProfile.name);
                         vesselProfiles.Add(newVessel.id, parentProfile.Clone());
                     } // otherwise this is a vessel created out of the player's control, most likely an asteroid
-
-                    //// did we undock from something?
-                    //if (newVessel.rootPart.missionID == FlightGlobals.ActiveVessel.rootPart.missionID && vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id) && vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
-                    //{
-                    //    if (vesselProfiles.ContainsKey(newVessel.id))
-                    //    {
-                    //        Log.Error("ProfileManager.OnVesselCreate: Somehow we already have an entry for {0}? Investigate logic error", newVessel.id.ToString());
-                    //        return; // proceeding will just result in a thrown exception
-                    //    }
-                    //    // the new vessel will get a copy of its parents profile
-                    //    Log.Normal("New vessel created from {0}, assigning it a clone of parent's profile", FlightGlobals.ActiveVessel.vesselName);
-                    //    vesselProfiles.Add(newVessel.id, ActiveProfile.Clone());
-                    //}
                 }
             }
             catch (Exception e)
